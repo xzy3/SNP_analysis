@@ -18,13 +18,13 @@ grep -v "Stats for BAM file" /Users/Shared/_WGS/dailyReport2.txt > /Users/Shared
 
 mail -s "WGS results" tod.p.stuber@aphis.usda.gov < /Users/Shared/_WGS/dailyReport3.txt
 
-#mail -s "WGS results" patrick.m.camp@aphis.usda.gov < /Users/Shared/_WGS/dailyReport3.txt
+mail -s "WGS results" patrick.m.camp@aphis.usda.gov < /Users/Shared/_WGS/dailyReport3.txt
 
-#mail -s "WGS results" suelee.robbe-austerman@aphis.usda.gov < /Users/Shared/_WGS/dailyReport3.txt
+mail -s "WGS results" suelee.robbe-austerman@aphis.usda.gov < /Users/Shared/_WGS/dailyReport3.txt
 
-#mail -s "WGS results" Christine.R.Quance@aphis.usda.gov < /Users/Shared/_WGS/dailyReport3.txt
+mail -s "WGS results" Christine.R.Quance@aphis.usda.gov < /Users/Shared/_WGS/dailyReport3.txt
 
-#mail -s "WGS results" David.T.Farrell@aphis.usda.gov < /Users/Shared/_WGS/dailyReport3.txt
+mail -s "WGS results" David.T.Farrell@aphis.usda.gov < /Users/Shared/_WGS/dailyReport3.txt
 
 rm /Users/Shared/_WGS/dailyReport2.txt
 rm /Users/Shared/_WGS/dailyReport3.txt

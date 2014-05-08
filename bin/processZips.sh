@@ -340,7 +340,38 @@ rm $n.Quality_by_cycle.quality_distribution.pdf
 rm $n.CollectGcBiasMetrics
 rm $n.QualityScoreDistribution
 
-stats_bamtools.sh
+#stats_bamtools.sh
+###########################
+
+echo "***Getting stats for $n"
+
+#bamtools stats -in $n.ready-mem.bam >> $n.stats2.txt
+
+# Split output to multiple processes using tee.
+bamtools stats -in $n.ready-mem.bam | tee >($n.stats2.txt) >(awk '{sum+=$3} END { print "Average coverage: ",sum/NR"X"}' >> $n.stats2.txt) | awk '{if ($3 < 1) ++b } END {print "Reference with coverage:  "((FNR-b)/FNR)*100"%"}' >> $n.stats2.txt
+
+echo "fastq.gz file sizes:" >> $n.stats2.txt
+ls -lh ../Zips/ | awk '{print $5}' | egrep -v '^$' >> $n.stats2.txt
+
+echo "Unmapped fastq file sizes:" >> $n.stats2.txt
+ls -lh ../unmappedReads/*.fastq | awk '{print $5}' | egrep -v '^$' >> $n.stats2.txt
+
+echo "Unmapped contig count:" >> $n.stats2.txt
+grep -c ">" ../unmappedReads/${n}_abyss-3.fa >> $n.stats2.txt
+
+#Space
+echo "" >> $n.stats2.txt
+
+#bamtools coverage -in $n.ready-mem.bam | awk '{sum+=$3} END { print "Average coverage: ",sum/NR"X"}' >> $n.stats2.txt
+
+#bamtools coverage -in $n.ready-mem.bam | awk '{if ($3 < 1) ++b } END {print "Reference with coverage:  "((FNR-b)/FNR)*100"%"}' >> $n.stats2.txt
+
+
+cat $n.stats2.txt | grep -v "Failed" | grep -v "Duplicates" | grep -v "Proper-pairs" >> $n.stats.txt
+
+rm $n.stats2.txt
+
+###########################
 
 echo "" >> $n.stats.txt
 

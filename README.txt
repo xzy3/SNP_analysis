@@ -1,14 +1,12 @@
-The scripts contained in this directory are ment to provide a high resolution SNP analysis of closely related isolates.
+The scripts contained in this directory are meant to provide a low and high resolution SNP analysis of closely related isolates.  Individuals should customize scripts to cater to the throughput of their lab.  The two main scripts are: processZips.sh and vcftofasta.sh.  processZips outputs BAM and VCFs from Illumina paired-end data.  processZips.sh is called on a working directory containing paired files with “R1” and “R2” designations.  VCFs output from processZips.sh are collected into a single working directory and vcftofasta.sh is called.  Output are alignment files to be viewed in a tree viewer of chose, and SNP tables which provide a high resolution view of SNP data.
 
-This script is the second script in a two script workflow.  Script 2 genotypes Mycobacterium tuberculosis complex and Brucella species from SNP data contained in VCFs.  It operates on VCFs generated with the same reference output from script 1.  VCFs are collected into a single working directory.  Comparisons are output as SNP tables and alignment files to view as trees in your program of choice.
+The first script ran on 20 isolates from a typical MiSeq run using 2 x 250 chemistry outputting 3.3 mb genomes with approximately 150X average depth of coverage on an Apple Mac Pro with 2 x 6-core Xeon processors and 48 GB of memory will complete in 1.5 hours.  Following the first script a collection of a 1000 VCFs will analyze through vcftofasta.sh in 2 hours.  Although more processing and memory is favorable, scripts have been tested successfully using a Macbook laptop with an Intel Core 2 Duo processor and 4 GB of memory.
 
-Script 2 will run and output tables and alignments from just the data generated from script 1, however the data will be more informative if additional files are provide.  Those files are:
-1) A file that contains positions to cluster individual isolates/VCFs into groups, subgroups and clades.
-2) Files that contain positions to remove from the analysis.
+Currently the main use of this workflow is for genotyping Mycobacterium tuberculosis complex and Brucella species. 
 
 Paradigm
 1) Once a SNP occurs and establishes in a population it does not revert back
 2) Observations of homoplasy are rare
-3) Group, subgroup and clade clusters only show parsimony informative SNPs for the isolates within that cluster
+3) Group, subgroup and clade clusters only show informative SNPs for the isolates within that cluster
 4) SNPs observed in a single isolate are less informative than SNPs seen in multiple isolates and therefore established in a population
 

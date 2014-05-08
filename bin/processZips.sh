@@ -115,6 +115,15 @@ elif [ $1 == bovis ]; then
     coverageFiles="/Volumes/Data_HD/Mycobacterium/script_dependents/coverageFiles-chrom"
     copyto="/Volumes/Data_HD/Mycobacterium/Analysis_new/2014-05-07/copytoTest"
 
+    ###################################################################
+
+    # Run spoligoSpacerFinder.sh
+    echo "Starting spoligoSpacerFinder.sh"
+    spoligoSpacerFinder.sh &
+    echo "Moving forward from spoligoSpacerFinder.sh"
+
+    ###################################################################
+
 else
     "see line $LINENO in $0"
     copyto="/Volumes/Data_HD/Brucella/processZips_dependencies/Unknowns"
@@ -156,7 +165,7 @@ fi
 
 # See echo comments
 echo "***bwa index $r"
-/Users/Shared/_programs/bwa-0.7.5a/bwa index $ref
+bwa index $ref
 #echo "***bwa aln forward $n"
 # -t sets the number of threads/cores
 #please use option `-M' to flag extra hits as secondary.
@@ -166,7 +175,7 @@ echo "***bwa index $r"
 # -r STR	 Specify the read group in a format like ‘@RG\tID:foo\tSM:bar’ Needed for GATK
 #adding -B 8 will require reads to have few mismatches to align to reference.  -B 1 will allow more mismatch per read.
 echo "***Making Sam file"
-/Users/Shared/_programs/bwa-0.7.5a/bwa mem -M -t 4 -R @RG"\t"ID:"$n""\t"PL:ILLUMINA"\t"PU:"$n"_RG1_UNIT1"\t"LB:"$n"_LIB1"\t"SM:"$n" $ref $forReads $revReads > $n.sam
+bwa mem -M -t 4 -R @RG"\t"ID:"$n""\t"PL:ILLUMINA"\t"PU:"$n"_RG1_UNIT1"\t"LB:"$n"_LIB1"\t"SM:"$n" $ref $forReads $revReads > $n.sam
 
 
 # -b	 Output in the BAM format.
@@ -181,7 +190,7 @@ samtools view -bh -T $ref $n.sam > $n.all.bam
 #Strip off the unmapped reads
 samtools view -h -f4 $n.all.bam > $n.unmappedReads.sam
 #Create fastqs of unmapped reads to assemble
-java -Xmx2g -jar  /Users/Shared/_programs/picard-tools-1.94/SamToFastq.jar INPUT=$n.unmappedReads.sam FASTQ=${n}-unmapped_R1.fastq SECOND_END_FASTQ=${n}-unmapped_R2.fastq
+java -Xmx2g -jar  /Users/Shared/_programs/picard-tools-1.100/SamToFastq.jar INPUT=$n.unmappedReads.sam FASTQ=${n}-unmapped_R1.fastq SECOND_END_FASTQ=${n}-unmapped_R2.fastq
 rm $n.all.bam
 rm $n.unmappedReads.sam
 abyss-pe name=${n}_abyss k=64 in="${n}-unmapped_R1.fastq ${n}-unmapped_R1.fastq"
@@ -242,7 +251,7 @@ java -Xmx2g -jar /Users/Shared/_programs/GenomeAnalysisTK-3.1-1/GenomeAnalysisTK
 echo "******Awk VCF leaving just SNPs******"
 awk '/#/ || $4 ~ /^[ATGC]$/ && $5 ~ /^[ATGC]$/ {print $0}' $n.hapreadyAll.vcf > $n.hapreadyOnlySNPs.vcf
 
-java -Xmx750m -jar /Users/Shared/_programs/IGVTools/igvtools.jar index $n.hapreadyOnlySNPs.vcf
+java -Xmx2g -jar /Users/Shared/_programs/IGVTools/igvtools.jar index $n.hapreadyOnlySNPs.vcf
 
 echo "***Deleting Files"
 rm $n.sr1.sai

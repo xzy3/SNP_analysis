@@ -19,7 +19,6 @@ END
 #  Dependencies ---
 #   Tested and ran on OS X V10.9
 #   -Xcode developer tools
-#   -dos2unix
 #   -ClustalW
 #################################################################################
 
@@ -220,6 +219,7 @@ else
 
     echo ""
     echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis"
+    echo "For example, type ~$ vcftofasta.sh bovis"
     echo ""
     exit 1
 
@@ -241,11 +241,13 @@ Ncov=1 # Coverage below this value will be changed to -
 fulDir=$PWD # Current working directory, do not change.
 
 #################################################################################
-# Count the number of chromosomes used in the reference when making the VCFs.
+
+# Count the number of chromosomes used in the reference when VCFs were made.
 singleFile=`ls *.vcf | head -1`
 chromCount=`grep -v "#" $singleFile | awk '{print $1}' | sort | uniq -d | awk 'END {print NR}'`
 chroms=`grep -v "#" $singleFile | awk '{print $1}' | sort -n | uniq -d`
 echo "The number of chromosomes seen in VCF: $chromCount"
+
 #################################################################################
 
 # Remove selected files from comparison
@@ -328,7 +330,7 @@ echo "*********************************************************************" >> 
 
 function filterFilespreparation () {
 
-python -u /Users/Shared/_programs/Python/inputXLS.py | sed 's/ u//g' | tr "," "\t" | sed "s/\'//g" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' > ~/Desktop/filterFile.txt
+python -u /Users/Shared/_programs/_my_scripts/python_scripts/inputXLS.py | sed 's/ u//g' | tr "," "\t" | sed "s/\'//g" | sed 's/\[//g' |sed 's/\]//g' |sed 's/ //g' | sed 's/^u//g' | sed 's/\.0//g' > ~/Desktop/filterFile.txt
 
 echo "Waiting for filter file creation to complete"
 #FilterFileCreations.sh
@@ -755,7 +757,7 @@ done
 echo "Making Files Unix Compatiable"
 
 for v in *.vcf; do
-    /opt/local/bin/dos2unix $v #Fixes files opened and saved in Excel
+    dos2unix $v #Fixes files opened and saved in Excel
     cat $v | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' > temp
     mv temp $v
 done
@@ -1128,7 +1130,7 @@ echo "$d *********"
 pwd
 
 cat *.fas | sed '/reference/{N;d;}' >> fastaGroup.txt
-/Users/Shared/_programs/clustalw-2.1-macosx/clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt &&
+clustalw2 -OUTFILE=alignment.txt -RANGE=1,2 -OUTPUT=FASTA -INFILE=fastaGroup.txt &&
 grep ">" alignment.txt | sed 's/>//g' > cleanedAlignment.txt
 awk 'NR==FNR{o[FNR]=$1; next} {t[$1]=$0} END{for(x=1; x<=FNR; x++){y=o[x]; print t[y]}}' cleanedAlignment.txt ../$d.table.txt > joined.txt
 grep "reference" ../$d.table.txt > references.txt
@@ -1198,7 +1200,7 @@ awk '{a[NR]=$0} END {print a[NR]; for (i=1;i<NR;i++) print a[i]}' orginizedTable
 awk '{a[NR]=$0} END {print a[NR]; for (i=1;i<NR;i++) print a[i]}' orginizedTable5.txt > orginizedTable6.txt
 
 #Transpose
-awk -f /Users/Shared/_programs/awkscripts/transpose.awk orginizedTable6.txt > orginizedTable7.txt
+awk -f /Users/Shared/_programs/_my_scripts/awk_scripts/transpose.awk orginizedTable6.txt > orginizedTable7.txt
 
 #Orgainize file based on 1st 2 columns
 sort -n -k1 orginizedTable7.txt | sort -n -k2 > orginizedTable8.txt
@@ -1208,7 +1210,7 @@ awk -v OFS="\t" '$1=$1' orginizedTable8.txt > orginizedTable9.txt
 awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' orginizedTable9.txt | awk 'BEGIN{FS=OFS="\t"}{$1="";sub("\t","")}1' > orginizedTable10.txt
 
 #Transpose back
-awk -f /Users/Shared/_programs/awkscripts/transpose.awk orginizedTable10.txt > orginizedTable11.txt
+awk -f /Users/Shared/_programs/_my_scripts/awk_scripts/transpose.awk orginizedTable10.txt > orginizedTable11.txt
 
 c=`basename $PWD`
 #Convert spaces to tabs
@@ -1314,6 +1316,7 @@ mail -s "$fileName $@ completed" christine.r.quance@aphis.usda.gov < log.txt
 
 echo "****************************** END ******************************"
 pwd
+
 #
 #  Created by Stuber, Tod P - APHIS on 5/3/2014.
 #

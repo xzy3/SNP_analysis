@@ -16,8 +16,7 @@
 #   samtools, http://samtools.sourceforge.net/samtools.shtml
 #   picard, http://picard.sourceforge.net/command-line-overview.shtml
 #   gatk, http://www.broadinstitute.org/gatk/
-#   stats_bamtools.sh (included)
-#   bamtools
+#   stats_bamtools.sh
 #   File containing high quality SNPs, Volumes/Mycobacterium/Go_To_File/HighestQualitySNPs.vcf
 #   Reference in fasta format, /Volumes/Data_HD/Mycobacterium/Go_To_File/NC_002945.fasta
 #################################################################################
@@ -126,10 +125,8 @@ elif [ $1 == bovis ]; then
     ###################################################################
 
 else
-    "see line $LINENO in $0"
-    copyto="/Volumes/Data_HD/Brucella/processZips_dependencies/Unknowns"
-    cp -r ../../${n} $copyto
-exit 1
+    echo "Incorrect argument!  Must use one of the following arguments: ab1, mel, suis1, suis2, suis3, suis4, canis, ceti1, ceti2, ovis, bovis"
+    exit 1
 fi
 
 # Grab reads and reference and place them in variables
@@ -341,15 +338,10 @@ rm $n.Quality_by_cycle.quality_distribution.pdf
 rm $n.CollectGcBiasMetrics
 rm $n.QualityScoreDistribution
 
-#stats_bamtools.sh
 ###########################
-
 echo "***Getting stats for $n"
 
-#bamtools stats -in $n.ready-mem.bam >> $n.stats2.txt
-
-# Split output to multiple processes using tee.
-bamtools stats -in $n.ready-mem.bam | tee >($n.stats2.txt) >(awk '{sum+=$3} END { print "Average coverage: ",sum/NR"X"}' >> $n.stats2.txt) | awk '{if ($3 < 1) ++b } END {print "Reference with coverage:  "((FNR-b)/FNR)*100"%"}' >> $n.stats2.txt
+bamtools stats -in $n.ready-mem.bam > $n.stats2.txt
 
 echo "fastq.gz file sizes:" >> $n.stats2.txt
 ls -lh ../Zips/ | awk '{print $5}' | egrep -v '^$' >> $n.stats2.txt
@@ -359,22 +351,18 @@ ls -lh ../unmappedReads/*.fastq | awk '{print $5}' | egrep -v '^$' >> $n.stats2.
 
 echo "Unmapped contig count:" >> $n.stats2.txt
 grep -c ">" ../unmappedReads/${n}_abyss-3.fa >> $n.stats2.txt
-
-#Space
 echo "" >> $n.stats2.txt
 
-#bamtools coverage -in $n.ready-mem.bam | awk '{sum+=$3} END { print "Average coverage: ",sum/NR"X"}' >> $n.stats2.txt
+# Split output to multiple processes using tee.
+#bamtools coverage -in $n.ready-mem.bam | tee >((awk '{sum+=$3} END { print "Average coverage: ",sum/NR"X"}' >> $n.stats2.txt)) | awk '{if ($3 < 1) ++b } END {print "Reference with coverage:  "((FNR-b)/FNR)*100 "%"}' >> $n.stats2.txt
 
-#bamtools coverage -in $n.ready-mem.bam | awk '{if ($3 < 1) ++b } END {print "Reference with coverage:  "((FNR-b)/FNR)*100"%"}' >> $n.stats2.txt
-
+bamtools coverage -in $n.ready-mem.bam | awk '{sum+=$3} END { print "Average coverage: ",sum/NR"X"}' >> $n.stats2.txt
+bamtools coverage -in $n.ready-mem.bam | awk '{if ($3 < 1) ++b } END {print "Reference with coverage:  "((FNR-b)/FNR)*100 "%"}' >> $n.stats2.txt
 
 cat $n.stats2.txt | grep -v "Failed" | grep -v "Duplicates" | grep -v "Proper-pairs" >> $n.stats.txt
-
 rm $n.stats2.txt
-
-###########################
-
 echo "" >> $n.stats.txt
+###########################
 
 #  Add Insert_Size and Read_Length to stats.txt file
 echo 'Mean_Insert_Size  Standard_Deviation:' >> $n.stats.txt

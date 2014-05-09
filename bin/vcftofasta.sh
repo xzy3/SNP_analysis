@@ -679,7 +679,13 @@ echo "****************************** START ******************************"
 chmod 777 /Users/tstuberadmin/Desktop/Untitled.tab
 cat /Users/tstuberadmin/Desktop/Untitled.tab | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' > /Users/tstuberadmin/Desktop/Untitled.txt
 
-clean_tag.sh $genotypingcodes
+#clean_tag.sh $genotypingcodes
+####################
+# Clean the genotyping codes used for naming output
+sed 's/\*//g' < $genotypingcodes | sed 's/(/_/g' | sed 's/)/_/g' | sed 's/ /_/g' | sed 's/-_/_/g' | sed 's/_-/_/g' | sed 's/,/_/g' | sed 's#/#_#g' | sed 's#\\#_#g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/__/_/g' | sed 's/-$//g' | sed 's/_$//g' |awk 'BEGIN {OFS="\t"}{gsub("_$","",$1)}1' > outfile.txt
+
+mv outfile.txt $genotypingcodes
+####################
 
 # Test for duplicate VCFs
 testDuplicates
@@ -1201,7 +1207,24 @@ awk '{a[NR]=$0} END {print a[NR]; for (i=1;i<NR;i++) print a[i]}' orginizedTable
 
 #Transpose
 #awk -f /Users/Shared/_programs/_my_scripts/awk_scripts/transpose.awk orginizedTable6.txt > orginizedTable7.txt
-awk {for (i=1; i<=NF; i++)  { a[NR,i] = $i}} NF>p { p = NF } END {for(j=1; j<=p; j++) {str=a[1,j]; for(i=2; i<=NR; i++){ str=str" "a[i,j]} print str}} orginizedTable6.txt > orginizedTable7.txt
+#awk '{for (i=1; i<=NF; i++)  { a[NR,i] = $i}} NF>p { p = NF } END {for(j=1; j<=p; j++) {str=a[1,j]; for(i=2; i<=NR; i++){ str=str" "a[i,j]} print str}} orginizedTable6.txt > orginizedTable7.txt
+###
+awk '{
+for (i=1; i<=NF; i++)  {
+a[NR,i] = $i
+}
+}
+NF>p { p = NF }
+END {
+for(j=1; j<=p; j++) {
+str=a[1,j]
+for(i=2; i<=NR; i++){
+str=str" "a[i,j];
+}
+print str
+}
+}' orginizedTable6.txt > orginizedTable7.txt
+###
 
 #Orgainize file based on 1st 2 columns
 sort -n -k1 orginizedTable7.txt | sort -n -k2 > orginizedTable8.txt
@@ -1310,9 +1333,9 @@ cp -r $PWD ${bioinfoVCF}
 echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 
-mail -s "$fileName $@ completed" tod.p.stuber@aphis.usda.gov < log.txt
-mail -s "$fileName $@ completed" suelee.robbe-austerman@aphis.usda.gov < log.txt
-mail -s "$fileName $@ completed" christine.r.quance@aphis.usda.gov < log.txt
+#mail -s "$fileName $@ completed" tod.p.stuber@aphis.usda.gov < log.txt
+#mail -s "$fileName $@ completed" suelee.robbe-austerman@aphis.usda.gov < log.txt
+#mail -s "$fileName $@ completed" christine.r.quance@aphis.usda.gov < log.txt
 
 
 echo "****************************** END ******************************"

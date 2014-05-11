@@ -4,7 +4,11 @@ Bacterial SNP Pipeline
 INTRODUCTION
 ============
 
-The scripts contained in this directory are meant to provide a low and high resolution SNP analysis of closely related isolates.  Individuals should customize scripts to cater to their lab’s throughput.  There are two main scripts: processZips.sh and vcftofasta.sh.  processZips.sh outputs BAM and VCFs from Illumina paired-end data.  processZips.sh is called on a working directory containing paired files with “R1” and “R2” designations.  VCFs output from processZips.sh are collected into a single working directory and vcftofasta.sh is called.  Output is alignment files to be viewed in a tree viewer of choice, and SNP tables which provide a high resolution view of SNP data.
+The scripts contained in this directory are meant to provide a low and high resolution SNP analysis of closely related isolates.  Individuals should customize scripts to cater to their lab’s throughput.  There are two main scripts: processZips.sh and vcftofasta.sh.  processZips.sh outputs BAM and VCFs from Illumina paired-end data.  
+
+1) processZips.sh is called on a working directory containing paired files with “R1” and “R2” designations.
+
+2) VCFs output from processZips.sh are collected into a single working directory and vcftofasta.sh is called outputting alignment files to be viewed in a tree viewer of choice, and SNP tables which provide a high resolution view of SNP data.
 
 Currently the script is specifically designed to analyze Mycobacterium tuberculosis complex and Brucella specie isolates.  The scripts are not meant to be installed and go.  A basic understanding of shell scripting is required.
 
@@ -23,10 +27,13 @@ email_loopFiles.sh is used to help communicate results to interested individuals
 
 vcftofasta.sh takes VCFs created with the same reference and creates alignment files and SNP tables.  The “ready-mem.vcf” output by processZips.sh must be used.  This script is less straight forward than the previous scripts.  
 
-	1) It is dependent on SNP positions to define groups, subgroups and clades.  
-	2) It relies heavily on regular expressions to move files around.  Therefore some thought must go in to how files are named.  Basically if your file has a unique name right of the first “_” or “.” in its name you have a good start.  Also be sure your name is not to simple that it will find more than one dependent file.  For example, if a file is named, RB51.vcf and you have more than two RB51 being used in sample names, such as: another sample named Ref-RB51 then there will be conflicts.
-	3) Filter files can be used to filter regions of the genome that consistently produce poor SNP results.
-	4) Coverage files output by processZip.sh placed into their own directory can be used to factor in depth-of-coverage into the SNP analysis.
+1) It is dependent on SNP positions to define groups, subgroups and clades.  
+
+2) It relies heavily on regular expressions to move files around.  Therefore some thought must go in to how files are named.  Basically if your file has a unique name right of the first “_” or “.” in its name you have a good start.  Also be sure your name is not to simple that it will find more than one dependent file.  For example, if a file is named, RB51.vcf and you have more than two RB51 being used in sample names, such as: another sample named Ref-RB51 then there will be conflicts.
+
+3) Filter files can be used to filter regions of the genome that consistently produce poor SNP results.
+
+4) Coverage files output by processZip.sh placed into their own directory can be used to factor in depth-of-coverage into the SNP analysis.
 
 All four of these items listed can be ignored when first running the script.  The script will run and complete.  Each item can then be added into the analysis based on your individual needs. 
 
@@ -40,17 +47,27 @@ The first script ran on 20 isolates from a typical MiSeq run using 2 x 250 chemi
 
 Software Requirements—
 
-	1) Place all files in SNP_analysis into the shell’s path.
-	2) Xcode developer tools (tested on OS X 10.8 and 10.9)
-	3) BWA, http://bio-bwa.sourceforge.net/bwa.shtml ver. 0.7.5 or greater
-	4) Samtools, http://samtools.sourceforge.net/samtools.shtml ver 0.1.19 or greater
-	5) Picard, http://picard.sourceforge.net/command-line-overview.shtml ver 1.100 or greater
-	6) GATK, http://www.broadinstitute.org/gatk/ ver 3.1 or greater
-	7) IGV tools http://www.broadinstitute.org/igv/igvtools
-	8) bamtools https://github.com/pezmaster31/bamtools
-	9) ABySS http://www.bcgsc.ca/platform/bioinfo/software/abyss ver 1.3.4 or greater
-	10) RStudio IDE and R libraries ggplot2 and gsalib
-	11) Clustal W http://www.clustal.org/clustal2/#Download ver 2.1 or greater
+1) Place all files in SNP_analysis into the shell’s path.
+
+2) Xcode developer tools (tested on OS X 10.8 and 10.9)
+
+3) BWA, http://bio-bwa.sourceforge.net/bwa.shtml ver. 0.7.5 or greater
+
+4) Samtools, http://samtools.sourceforge.net/samtools.shtml ver 0.1.19 or greater
+
+5) Picard, http://picard.sourceforge.net/command-line-overview.shtml ver 1.100 or greater
+
+6) GATK, http://www.broadinstitute.org/gatk/ ver 3.1 or greater
+
+7) IGV tools http://www.broadinstitute.org/igv/igvtools
+
+8) bamtools https://github.com/pezmaster31/bamtools
+
+9) ABySS http://www.bcgsc.ca/platform/bioinfo/software/abyss ver 1.3.4 or greater
+
+10) RStudio IDE and R libraries ggplot2 and gsalib
+
+11) Clustal W http://www.clustal.org/clustal2/#Download ver 2.1 or greater
 
 If this is unfamiliar the link below is a great place to start:
 http://gatkforums.broadinstitute.org/discussion/2899/howto-install-all-software-packages-required-to-follow-the-gatk-best-practices
@@ -66,15 +83,23 @@ Filter files (At the beginning of vcftofasta.sh in the argument controls the fil
 OUTPUT
 ======
 
-	1) BAM file of mapped reads.
-	2)VCF files
-		a) ready-mem.vcf made using UnifiedGenotyper
-		b) hapreadyAll.vcf made using HaplotypeCaller
-		c) hapreadyOnlySNPs.vcf same as above but only SNPs
-	3) Unmapped reads and assembled contigs
-	4) Spoligotype octal code if TB isolate
-	5) Identification if Brucella species
-	6) Index files
+1) BAM file of mapped reads
+
+2)VCF files
+
+   a) ready-mem.vcf made using UnifiedGenotyper
+   
+   b) hapreadyAll.vcf made using HaplotypeCaller
+   
+   c) hapreadyOnlySNPs.vcf same as above but only SNPs
+   
+3) Unmapped reads and assembled contigs
+
+4) Spoligotype octal code if TB isolate
+
+5) Identification if Brucella species
+
+6) Index files
 
 INTERPRETATION OF RESULTS
 =========================
@@ -86,7 +111,6 @@ INTERPRETATION OF RESULTS
 3) Group, subgroup and clade clusters only show informative SNPs for the isolates within that cluster
 
 4) SNPs observed in a single isolate are less informative than SNPs seen in multiple isolates and therefore established in a population
-
 
 EXAMPLES
 ========

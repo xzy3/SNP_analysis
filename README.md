@@ -87,12 +87,12 @@ OUTPUT
 
 2)VCF files
 
-   a) ready-mem.vcf made using UnifiedGenotyper
-   
-   b) hapreadyAll.vcf made using HaplotypeCaller
-   
-   c) hapreadyOnlySNPs.vcf same as above but only SNPs
-   
+     a) ready-mem.vcf made using UnifiedGenotyper
+     
+     b) hapreadyAll.vcf made using HaplotypeCaller
+     
+     c) hapreadyOnlySNPs.vcf same as above but only SNPs
+     
 3) Unmapped reads and assembled contigs
 
 4) Spoligotype octal code if TB isolate

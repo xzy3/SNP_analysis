@@ -80,9 +80,13 @@ INTERPRETATION OF RESULTS
 =========================
 
 1) Once a SNP occurs and establishes in a population it does not revert back
+
 2) Observations of homoplasy are rare
+
 3) Group, subgroup and clade clusters only show informative SNPs for the isolates within that cluster
+
 4) SNPs observed in a single isolate are less informative than SNPs seen in multiple isolates and therefore established in a population
+
 
 EXAMPLES
 ========

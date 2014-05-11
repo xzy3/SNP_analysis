@@ -83,23 +83,15 @@ Filter files (At the beginning of vcftofasta.sh in the argument controls the fil
 OUTPUT
 ======
 
-1) BAM file of mapped reads
-
-2)VCF files
-
-     a) ready-mem.vcf made using UnifiedGenotyper
-     
-     b) hapreadyAll.vcf made using HaplotypeCaller
-     
-     c) hapreadyOnlySNPs.vcf same as above but only SNPs
-     
-3) Unmapped reads and assembled contigs
-
-4) Spoligotype octal code if TB isolate
-
-5) Identification if Brucella species
-
-6) Index files
+1. BAM file of mapped reads
+2. VCF files
+	a) ready-mem.vcf made using UnifiedGenotyper
+	b) hapreadyAll.vcf made using HaplotypeCaller
+	c) hapreadyOnlySNPs.vcf same as above but only SNPs
+3. Unmapped reads and assembled contigs
+4. Spoligotype octal code if TB isolate
+5. Identification if Brucella species
+6. Index files
 
 INTERPRETATION OF RESULTS
 =========================

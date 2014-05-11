@@ -94,8 +94,8 @@ TEST DATA
 
 CONTACT
 =======
-Tod Stuber
-tod.p.stuber@usda.gov
+Tod Stuber,
+tod.p.stuber@usda.gov,
 515-343-6935
 
 Please contact me with questions, comments, or suggestions.

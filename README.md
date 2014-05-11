@@ -17,7 +17,7 @@ spoligoSpacerfinder.sh will output the spoligo octal code if reads are from a TB
 
 bruc_oligo_identifier.sh will identify Brucella reads as Brucella abortus bv 1, 2 or 4, Brucella abortus bv 3, Brucella abortus bv 5, 6 or 9, Brucella melitensis, Brucella suis bv1, Brucella suis bv2, Brucella suis bv3, Brucella suis bv4, Brucella ceti group 1, Brucella ceti group 2, Brucella canis, or Brucella ovis and then starts processZips.sh with the correct arguement/reference.
 
-loopFiles.sh is used to help speed up the analysis when multiple isolates are needing to be placed through the pipeline.  If a list of fastq.gz file are placed in directory and named properly the isolates will be organized into their individual folders and bruc_oligo_identifier and processZips will be called.  Paired files must have R1 and R2 designations.  They must have matching names.  Names are determined by taking any character before “_” or “.”.  Therefore files 01-3941_S1_L001_R1_001.fastq.gz and 01-3941_S1_L001_R2_001.fastq.gz will be placed into a directory named “01-3941”.  If the file name begins with a “B” the sample is ran as a Brucella species.  If no “B” is present as 01-3941 the isolate is ran as TB complex.
+loopFiles.sh is used to help speed up the analysis when multiple isolates are needing to be placed through the pipeline.  If a list of fastq.gz file are placed in directory and named properly the isolates will be organized into their individual folders and bruc_oligo_identifier and processZips will be called.  Paired files must have R1 and R2 designations.  They must have matching names.  Names are determined by taking any character before "_" or ".".  Therefore files 01-3941_S1_L001_R1_001.fastq.gz and 01-3941_S1_L001_R2_001.fastq.gz will be placed into a directory named “01-3941”.  If the file name begins with a “B” the sample is ran as a Brucella species.  If no “B” is present as 01-3941 the isolate is ran as TB complex.
 
 email_loopFiles.sh is used to help communicate results to interested individuals.  It calls loopFiles.sh, which then calls bruc_oligo_identifier.sh, which then calls processZips.sh.  Please remember to change the e-mail addresses.
 
@@ -40,17 +40,17 @@ The first script ran on 20 isolates from a typical MiSeq run using 2 x 250 chemi
 
 Software Requirements—
 
-1) Place all files in SNP_analysis into the shell’s path.
-2) Xcode developer tools (tested on OS X 10.8 and 10.9)
-3) BWA, http://bio-bwa.sourceforge.net/bwa.shtml ver. 0.7.5 or greater
-4) Samtools, http://samtools.sourceforge.net/samtools.shtml ver 0.1.19 or greater
-5) Picard, http://picard.sourceforge.net/command-line-overview.shtml ver 1.100 or greater
-6) GATK, http://www.broadinstitute.org/gatk/ ver 3.1 or greater
-7) IGV tools http://www.broadinstitute.org/igv/igvtools
-8) bamtools https://github.com/pezmaster31/bamtools
-9) ABySS http://www.bcgsc.ca/platform/bioinfo/software/abyss ver 1.3.4 or greater
-10) RStudio IDE and R libraries ggplot2 and gsalib
-11) Clustal W http://www.clustal.org/clustal2/#Download ver 2.1 or greater
+	1) Place all files in SNP_analysis into the shell’s path.
+	2) Xcode developer tools (tested on OS X 10.8 and 10.9)
+	3) BWA, http://bio-bwa.sourceforge.net/bwa.shtml ver. 0.7.5 or greater
+	4) Samtools, http://samtools.sourceforge.net/samtools.shtml ver 0.1.19 or greater
+	5) Picard, http://picard.sourceforge.net/command-line-overview.shtml ver 1.100 or greater
+	6) GATK, http://www.broadinstitute.org/gatk/ ver 3.1 or greater
+	7) IGV tools http://www.broadinstitute.org/igv/igvtools
+	8) bamtools https://github.com/pezmaster31/bamtools
+	9) ABySS http://www.bcgsc.ca/platform/bioinfo/software/abyss ver 1.3.4 or greater
+	10) RStudio IDE and R libraries ggplot2 and gsalib
+	11) Clustal W http://www.clustal.org/clustal2/#Download ver 2.1 or greater
 
 If this is unfamiliar the link below is a great place to start:
 http://gatkforums.broadinstitute.org/discussion/2899/howto-install-all-software-packages-required-to-follow-the-gatk-best-practices
@@ -66,23 +66,23 @@ Filter files (At the beginning of vcftofasta.sh in the argument controls the fil
 OUTPUT
 ======
 
-1) BAM file of mapped reads.
-2)VCF files
-	a) ready-mem.vcf made using UnifiedGenotyper
-	b) hapreadyAll.vcf made using HaplotypeCaller
-	c) hapreadyOnlySNPs.vcf same as above but only SNPs
-3) Unmapped reads and assembled contigs
-4) Spoligotype octal code if TB isolate
-5) Identification if Brucella species
-6) Index files
+	1) BAM file of mapped reads.
+	2)VCF files
+		a) ready-mem.vcf made using UnifiedGenotyper
+		b) hapreadyAll.vcf made using HaplotypeCaller
+		c) hapreadyOnlySNPs.vcf same as above but only SNPs
+	3) Unmapped reads and assembled contigs
+	4) Spoligotype octal code if TB isolate
+	5) Identification if Brucella species
+	6) Index files
 
 INTERPRETATION OF RESULTS
 =========================
 
-1) Once a SNP occurs and establishes in a population it does not revert back
-2) Observations of homoplasy are rare
-3) Group, subgroup and clade clusters only show informative SNPs for the isolates within that cluster
-4) SNPs observed in a single isolate are less informative than SNPs seen in multiple isolates and therefore established in a population
+	1) Once a SNP occurs and establishes in a population it does not revert back
+	2) Observations of homoplasy are rare
+	3) Group, subgroup and clade clusters only show informative SNPs for the isolates within that cluster
+	4) SNPs observed in a single isolate are less informative than SNPs seen in multiple isolates and therefore established in a population
 
 EXAMPLES
 ========

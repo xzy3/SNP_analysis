@@ -16,7 +16,7 @@
 #   samtools, http://samtools.sourceforge.net/samtools.shtml
 #   picard, http://picard.sourceforge.net/command-line-overview.shtml
 #   gatk, http://www.broadinstitute.org/gatk/
-#   stats_bamtools.sh
+#   bamtools
 #   File containing high quality SNPs, Volumes/Mycobacterium/Go_To_File/HighestQualitySNPs.vcf
 #   Reference in fasta format, /Volumes/Data_HD/Mycobacterium/Go_To_File/NC_002945.fasta
 #################################################################################

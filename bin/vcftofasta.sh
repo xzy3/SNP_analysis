@@ -313,7 +313,7 @@ echo "Possible Mixed Isolates" >> log
 echo "Defining SNPs that are called as AC=1" >> log
 echo "" >> log
 for i in *.vcf; do
-(echo "Finding possible AC1 matches for $i"; for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;" | awk 'BEGIN {FS=";"} {print $1, $2}' >> log) &
+(echo "Finding possible AC1 matches for $i"; for pos in $positionList; do awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ "^"x"$" ) print FILENAME, "Pos:", $2, "QUAL:", $6, $8 }' $i; done | grep "AC=1;A" | awk 'BEGIN {FS=";"} {print $1, $2}' >> log) &
     let count+=1
     [[ $((count%NR_CPUS)) -eq 0 ]] && wait
 done
@@ -545,7 +545,8 @@ for d in $directories; do
     echo "***Creating normalized vcf using AC2, QUAL > $QUAL"
         # Grab the name of the vcf file
         for i in *.vcf; do
-            (m=`basename "$i"`; n=`echo $m | sed $dropEXT`
+#(
+m=`basename "$i"`; n=`echo $m | sed $dropEXT`
             # echo the name grabbed
             echo $n
             # Create .cut file that lists the positions and ALT calls
@@ -569,13 +570,13 @@ cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.
     # Get the position of the zeroCoverage file
     # Get the position of the .filledcut file
             if [ $((chromCount)) -eq 1 ]; then
-                awk -v z=$Ncov '$3 <  z {print $2, $3}' $coverageFiles/$zeroFile | awk '{print $1}' > ${number}-zeroCoverage
+                awk -v z=$Ncov '$3 <  z {print $2, $3}' $coverageFiles/$zeroFile | awk '{print "chrom1-" $1}' > ${number}-zeroCoverage
                 elif [ $((chromCount)) -eq 2 ]; then
                 echo "*******************************************************************************"
                 # Get the position of the zeroCoverage file at first chromosome
-                awk -v z=$Ncov '$1 ~ /chrom1/ && $3 <  z {print chrom1","$2}' $coverageFiles/${number}-coverage > ${number}-zeroCoverage
+                awk -v z=$Ncov '$1 ~ /chrom1/ && $3 <  z {print "chrom1-" $2}' $coverageFiles/${number}-coverage > ${number}-zeroCoverage
                 # Get the position of the zeroCoverage file at second chromosome
-                awk -v z=$Ncov '$1 ~ /chrom2/ && $3 <  z {print chrom2","$2}' $coverageFiles/${number}-coverage >> ${number}-zeroCoverage
+                awk -v z=$Ncov '$1 ~ /chrom2/ && $3 <  z {print "chrom2-" $2}' $coverageFiles/${number}-coverage >> ${number}-zeroCoverage
                 echo "*******************************************************************************"
                 else
                 echo "Greater than 2 chromosomes present.  Exiting script."
@@ -587,21 +588,22 @@ cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.
             # Get duplicates of the cat file
             # This duplicats need to replace A,T,G or C to an N, Would like to make it a "." or "-" but Geneious does not recognize these characters.
             cat ${number}-NcatFile | sort | uniq -d > ${number}-duplicates
-            echo "1000000000" >> ${number}-duplicates
+            echo "chrom1-1000000000" >> ${number}-duplicates
             # Prepare duplicate regions to be used as variables in awk, to find and replace
-            pos=`cat ${number}-duplicates | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/'`
+            pos=`cat ${number}-duplicates | tr "\n" "|" | sed 's/|$//'`
             echo "Zero Coverage: $pos"
 #awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $0}' $n.filledcutnoN > $n.filledcut
-awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $0}' $n.filledcutnoN | sort -k1.6n -k1.8n > $n.filledcut
+awk -v x=$pos 'BEGIN {OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $1, $2}' $n.filledcutnoN | sort -k1.6n -k1.8n > $n.filledcut
 
             rm ${number}-zeroCoverage
             rm ${number}-filledcutNumbers
             rm ${number}-NcatFile
             rm ${number}-duplicates
             rm $n.filledcutnoN
-            rm $i) &
-            let count+=1
-            [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+            rm $i
+#) &
+#           let count+=1
+#           [[ $((count%NR_CPUS)) -eq 0 ]] && wait
             done
             echo "sleeping 10 seconds at line number: $LINENO"; sleep 10
             wait
@@ -1032,13 +1034,14 @@ cat ${number}-zeroCoverage ${number}-filledcutNumbers > ${number}-NcatFile
 # Get duplicates of the cat file
 # This duplicats need to replace A,T,G or C to an N, Would like to make it a "." or "-" but Geneious does not recognize these characters.
 cat ${number}-NcatFile | sort | uniq -d > ${number}-duplicates
-echo "1000000000" >> ${number}-duplicates
+echo "chrom1-1000000000" >> ${number}-duplicates
 # Prepare duplicate regions to be used as variables in awk, to find and replace
-pos=`cat ${number}-duplicates | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/'`
+#pos=`cat ${number}-duplicates | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/'`
+pos=`cat ${number}-duplicates | tr "\n" "|" | sed 's/|$//'`
 echo "Zero Coverage: $pos"
 #awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $0}' $n.filledcutnoN | sort -nk1 > $n.filledcut
-awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $0}' $n.filledcutnoN | sort -k1.6n -k1.8n > $n.filledcut
-
+awk -v x=$pos 'BEGIN {OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $1, $2}' $n.filledcutnoN | sort -k1.6n -k1.8n > $n.filledcut
+read -p "$LINENO, ENTER"
 rm ${number}-zeroCoverage
 rm ${number}-filledcutNumbers
 rm ${number}-NcatFile

@@ -1,6 +1,6 @@
 #!/bin/bash
-
-#  bovis_processZips.sh
+#  processZips.sh
+#
 #  Working directory should contain paired-end fastq reads
 #  Sample must be labeled with TB/Bruc number.
 #  TB numbers must be labeled ##-####
@@ -12,6 +12,7 @@
 #  Dependencies ---
 #   Tested and ran on OS X V10.9
 #   -Xcode developer tools
+#
 #   bwa, http://bio-bwa.sourceforge.net/bwa.shtml
 #   samtools, http://samtools.sourceforge.net/samtools.shtml
 #   picard, http://picard.sourceforge.net/command-line-overview.shtml
@@ -19,11 +20,8 @@
 #   bamtools
 #   igvtools
 #   abyss
-#   File containing high quality SNPs, Volumes/Mycobacterium/Go_To_File/HighestQualitySNPs.vcf
-#   Reference in fasta format, /Volumes/Data_HD/Mycobacterium/Go_To_File/NC_002945.fasta
 #################################################################################
 
-set -x
 
 # grab the local configuration
 INSTALL_ROOT=`dirname $0`
@@ -37,9 +35,14 @@ echo "**************************************************************************
 echo "current directory"
 pwd
 
+set -x
+
 # Move zip files to their own directory
 mkdir -p ./Zips
-mv *.fastq* ./Zips
+if test -n "$(find . -maxdepth 1 -name '*.fastq*' -print -quit)" ; then
+    mv *.fastq* ./Zips
+fi
+
 mkdir -p ./BWAmem-GATK
 cd BWAmem-GATK/
 
@@ -118,11 +121,11 @@ elif [ $1 == ovis ]; then
     copyto="$SNP_DATA_ROOT/Data_HD/Brucella/processZips_dependencies/Ovis/newFiles"
 
 elif [ $1 == bovis ]; then
-    cp $SNP_DATA_ROOT/Data_HD/Mycobacterium/script_dependents/NC_002945.fasta ./
-    hqs="$SNP_DATA_ROOT/Data_HD/Mycobacterium/script_dependents/HighestQualitySNPs.vcf"
+    cp $SNP_DATA_ROOT/Data_HD/Mycobacterium/processZips_dependencies/Bovis/script_dependents/NC_002945.fasta ./
+    hqs="$SNP_DATA_ROOT/Data_HD/Mycobacterium/processZips_dependencies/Bovis/script_dependents/HighestQualitySNPs.vcf"
     bioinfo="$SNP_DATA_ROOT/TStuber/Results/_Mycobacterium"
-    coverageFiles="$SNP_DATA_ROOT/Data_HD/Mycobacterium/script_dependents/coverageFiles-chrom"
-    copyto="$SNP_DATA_ROOT/Data_HD/Mycobacterium/Analysis_new/2014-05-07/copytoTest"
+    coverageFiles="$SNP_DATA_ROOT/Data_HD/Mycobacterium/processZips_dependencies/Bovis/script_dependents/coverageFiles-chrom"
+    copyto="$SNP_DATA_ROOT/Data_HD/Mycobacterium/processZips_dependencies/Bovis/newFiles"
 
     ###################################################################
 
@@ -444,6 +447,7 @@ date
 
 #
 #  Created by Stuber, Tod P - APHIS on 11/08/12.
+#  Contributor Sims, Seth - CDC
 #
 
 set +x

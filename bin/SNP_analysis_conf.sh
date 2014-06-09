@@ -4,11 +4,10 @@
 # Author Seth Sims <xzy3@cdc.gov>
 
 #   bwa, http://bio-bwa.sourceforge.net/bwa.shtml
-BWA=`which bwa`
-BWA_CORES='4'
+BWA=`which bwa 2>/dev/null`
 
 #   samtools, http://samtools.sourceforge.net/samtools.shtml
-SAMTOOLS=`which samtools`
+SAMTOOLS=`which samtools 2>/dev/null `
 
 #   picard, http://picard.sourceforge.net/command-line-overview.shtml
 PICARD_TOOLS_ROOT='/Users/Shared/_programs/picard-tools-1.100/'
@@ -20,17 +19,17 @@ PICARD_JRE_SETTINGS='-Xmx2g'
 GENOME_ANALYSIS_TK='java -Xmx2g -jar /Users/Shared/_programs/GenomeAnalysisTK-3.1-1/GenomeAnalysisTK.jar'
 
 #   bamtools
-BAMTOOLS=`which bamtools`
+BAMTOOLS=`which bamtools 2>/dev/null`
 
 # IGVTools
 IGVTOOLS='java -Xmx2g -jar /Users/Shared/_programs/IGVTools/igvtools.jar'
 
 # abyss-pe
-ABYSS_PE='which abyss-pe'
+ABYSS_PE=`which abyss-pe 2>/dev/null`
 
 # set defaults for variables that change the behavior of the script
 SEND_FILES_TO_NETWORK=true
-
+MAX_CORES='4'
 SNP_DATA_ROOT='/Volumes'
 
 

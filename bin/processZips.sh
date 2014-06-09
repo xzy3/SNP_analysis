@@ -22,7 +22,6 @@
 #   abyss
 #################################################################################
 
-
 # grab the local configuration
 INSTALL_ROOT=`dirname $0`
 source "$INSTALL_ROOT/SNP_analysis_conf.sh"
@@ -35,8 +34,6 @@ echo "**************************************************************************
 echo "current directory"
 pwd
 
-set -x
-
 # Move zip files to their own directory
 mkdir -p ./Zips
 if test -n "$(find . -maxdepth 1 -name '*.fastq*' -print -quit)" ; then
@@ -45,10 +42,6 @@ fi
 
 mkdir -p ./BWAmem-GATK
 cd BWAmem-GATK/
-
-
-# Make alias links in BWA-GATK directory to zip files
-ls ../Zips/*.fastq* | while read file; do ln -s $file; done
 
 if [ $1 == ab1 ]; then
     cp $SNP_DATA_ROOT/Data_HD/Brucella/processZips_dependencies/Abortus1/script_dependents/NC_00693c.fasta ./
@@ -141,6 +134,9 @@ else
     exit 1
 fi
 
+# Make alias links in BWA-GATK directory to zip files
+ls ../Zips/*.fastq* | while read file; do ln -s $file; done
+
 # Grab reads and reference and place them in variables
 ref=`ls | grep .fasta`
 echo "Reference Input:  $ref"
@@ -153,7 +149,7 @@ echo "Reverse Reads:  $revReads"
 
 #   retrieves reference name and name from sorted BAM file name
 r=`echo $ref | sed 's/\..*//'`
-n=`echo $revReads | sed 's/_.*//' | sed 's/\..*//'`
+n=`echo $revReads | sed 's/[_.].*//'`
 
 echo "***Reference naming convention:  $r"
 echo "***Isolate naming convention:  $n"
@@ -163,13 +159,13 @@ $PICARD_CreateSequenceDictonary REFERENCE=${ref} OUTPUT=${r}.dict
 
 if [ -s ${ref}.fai ] && [ -s ${r}.dict ]; then
     echo "Index and dict are present, continue script"
-    else
+else
     sleep 5
     echo "Either index or dict for reference is missing, try making again"
     $SAMTOOLS faidx $ref
     $PICARD_CreateSequenceDictonary REFERENCE=${ref} OUTPUT=${r}.dict
         if [ -s ${ref}.fai ] && [ -s ${r}.dict ]; then
-        read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
+            read -p "--> Script has been paused.  Must fix.  No reference index and/or dict file present. Press Enter to continue.  Line $LINENO"
         fi
 fi
 
@@ -185,7 +181,7 @@ $BWA index $ref
 # -r STR	 Specify the read group in a format like ‘@RG\tID:foo\tSM:bar’ Needed for GATK
 #adding -B 8 will require reads to have few mismatches to align to reference.  -B 1 will allow more mismatch per read.
 echo "***Making Sam file"
-$BWA mem -M -t $BWA_CORES -R "@RG\tID:$n\tPL:ILLUMINA\tPU:$n_RG1_UNIT1\tLB:$n_LIB1\tSM:$n" $ref $forReads $revReads > $n.sam
+$BWA mem -M -t $MAX_CORES -R "@RG\tID:$n\tPL:ILLUMINA\tPU:${n}_RG1_UNIT1\tLB:${n}_LIB1\tSM:$n" $ref $forReads $revReads > $n.sam
 
 
 # -b	 Output in the BAM format.
@@ -396,19 +392,25 @@ egrep -v "#" $n.ready-mem.vcf | egrep "AC=2" | awk '$6 > 150' | grep -c ".*" >> 
 echo "Mean Coverage"
 awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}'
 
-awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /Users/Shared/_WGS/coverageReport.txt
+if [ "$SEND_FILE_TO_NETWORK" = true ]; then
+    awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /Users/Shared/_WGS/coverageReport.txt
 
-echo "Sample identified and ran as:  $1" >> /Users/Shared/_WGS/dailyReport.txt
+    echo "Sample identified and ran as:  $1" >> /Users/Shared/_WGS/dailyReport.txt
 
-awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /Users/Shared/_WGS/dailyReport.txt
+    awk -v number="$n" 'BEGIN {OFS="\t"} $0 ~ number { print $1,$2,$3,$7 }' $n.Metrics_summary.xls | awk 'FNR == 2 {print $0}' >> /Users/Shared/_WGS/dailyReport.txt
+fi
 
 mv $n.Metrics_summary.xls QualityValues/
 mv $n.stats.txt QualityValues/
 rm $n.Quality_by_cycle.insert_size_metrics
 rm $n.AlignmentMetrics
-cat ../*out1* ../*out2* > ../${n}-identification.txt
-rm ../*identifier_out1*
-rm ../*identifier_out2*
+
+if test -n "$(find .. -maxdepth 1 -name '*.out1*' -or -name '*.out2*' -print -quit)" ; then
+    cat ../*out1* ../*out2* > ../${n}-identification.txt
+    rm ../*identifier_out1*
+    rm ../*identifier_out2*
+fi
+
 rm -r temp
 
 if [ "$SEND_FILE_TO_NETWORK" = true ]; then
@@ -449,5 +451,3 @@ date
 #  Created by Stuber, Tod P - APHIS on 11/08/12.
 #  Contributor Sims, Seth - CDC
 #
-
-set +x

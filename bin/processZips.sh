@@ -208,11 +208,30 @@ $ABYSS_PE name=${n}_abyss k=64 in="${UNMAPPED_R1} ${UNMAPPED_R2}"
 mkdir -p ../unmappedReads
 mv ${UNMAPPED_R1} ../unmappedReads
 mv ${UNMAPPED_R2} ../unmappedReads
-mv ${n}_abyss-3.fa ../unmappedReads
-mv ${n}_abyss-7.fa ../unmappedReads
-mv ${n}_abyss-stats ../unmappedReads
-mv *coverage* ../unmappedReads
-rm *abyss*
+if [ -e "${n}_abyss-3.fa" ]; then
+    mv ${n}_abyss-3.fa ../unmappedReads
+fi
+
+if [ -e "${n}_abyss-7.fa" ]; then
+    mv ${n}_abyss-7.fa ../unmappedReads
+fi
+
+if [ -e "${n}_abyss-8.fa" ]; then
+    mv ${n}_abyss-8.fa ../unmappedReads
+fi
+
+ABYSS_STATS=${n}_abyss-stats
+if [ -e "$ABYSS_STATS" ]; then
+    mv ${ABYSS_STATS} ../unmappedReads
+else
+    echo "${ABYSS_STATS} does not exist abyss did not complete successfully"
+fi
+
+if test -n "$(find . -maxdepth 1 -name '*coverage*' -print -quit)" ; then
+    mv *coverage* ../unmappedReads
+fi
+
+find . -maxdepth 1 -name '*abyss*' -delete
 ######################
 
 echo "***Sorting Bam"

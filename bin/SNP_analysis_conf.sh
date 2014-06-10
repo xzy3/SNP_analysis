@@ -5,6 +5,7 @@
 
 #   bwa, http://bio-bwa.sourceforge.net/bwa.shtml
 BWA=`which bwa 2>/dev/null`
+BWA_CORES='4'
 
 #   samtools, http://samtools.sourceforge.net/samtools.shtml
 SAMTOOLS=`which samtools 2>/dev/null `
@@ -17,6 +18,7 @@ PICARD_JRE_SETTINGS='-Xmx2g'
 
 #   gatk, http://www.broadinstitute.org/gatk/
 GENOME_ANALYSIS_TK='java -Xmx2g -jar /Users/Shared/_programs/GenomeAnalysisTK-3.1-1/GenomeAnalysisTK.jar'
+GATK_CORES=8
 
 #   bamtools
 BAMTOOLS=`which bamtools 2>/dev/null`
@@ -29,9 +31,7 @@ ABYSS_PE=`which abyss-pe 2>/dev/null`
 
 # set defaults for variables that change the behavior of the script
 SEND_FILES_TO_NETWORK=true
-MAX_CORES='4'
 SNP_DATA_ROOT='/Volumes'
-
 
 # load local configuration from user's home directory
 if [ -e "$HOME/SNP_analysis_conf.sh" ] ; then

@@ -181,7 +181,7 @@ $BWA index $ref
 # -r STR	 Specify the read group in a format like ‘@RG\tID:foo\tSM:bar’ Needed for GATK
 #adding -B 8 will require reads to have few mismatches to align to reference.  -B 1 will allow more mismatch per read.
 echo "***Making Sam file"
-$BWA mem -M -t $MAX_CORES -R "@RG\tID:$n\tPL:ILLUMINA\tPU:${n}_RG1_UNIT1\tLB:${n}_LIB1\tSM:$n" $ref $forReads $revReads > $n.sam
+$BWA mem -M -t $BWA_CORES -R "@RG\tID:$n\tPL:ILLUMINA\tPU:${n}_RG1_UNIT1\tLB:${n}_LIB1\tSM:$n" $ref $forReads $revReads > $n.sam
 
 
 # -b	 Output in the BAM format.
@@ -196,13 +196,18 @@ $SAMTOOLS view -bh -T $ref $n.sam > $n.all.bam
 #Strip off the unmapped reads
 $SAMTOOLS view -h -f4 $n.all.bam > $n.unmappedReads.sam
 #Create fastqs of unmapped reads to assemble
-$PICARD_SamToFastq INPUT=$n.unmappedReads.sam FASTQ=${n}-unmapped_R1.fastq SECOND_END_FASTQ=${n}-unmapped_R2.fastq
+UNMAPPED_R1=${n}-unmapped_R1.fastq
+UNMAPPED_R2=${n}-unmapped_R2.fastq
+
+$PICARD_SamToFastq INPUT=$n.unmappedReads.sam FASTQ=${UNMAPPED_R1} SECOND_END_FASTQ=${UNMAPPED_R2}
+
 rm $n.all.bam
 rm $n.unmappedReads.sam
-$ABYSS_PE name=${n}_abyss k=64 in="${n}-unmapped_R1.fastq ${n}-unmapped_R1.fastq"
+$ABYSS_PE name=${n}_abyss k=64 in="${UNMAPPED_R1} ${UNMAPPED_R2}"
+
 mkdir -p ../unmappedReads
-mv ${n}-unmapped_R1.fastq ../unmappedReads
-mv ${n}-unmapped_R2.fastq ../unmappedReads
+mv ${UNMAPPED_R1} ../unmappedReads
+mv ${UNMAPPED_R2} ../unmappedReads
 mv ${n}_abyss-3.fa ../unmappedReads
 mv ${n}_abyss-7.fa ../unmappedReads
 mv ${n}_abyss-stats ../unmappedReads
@@ -246,13 +251,13 @@ $GENOME_ANALYSIS_TK -T PrintReads -R $ref -I $n.realignedBam.bam -BQSR $n.recal_
 # Threads used can be changed
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=unifiedgenotyper
 echo "***UnifiedGenotyper, aka calling SNPs"
-$GENOME_ANALYSIS_TK -R $ref -T UnifiedGenotyper -I $n.ready-mem.bam -o $n.ready-mem.vcf -nt 8
+$GENOME_ANALYSIS_TK -R $ref -T UnifiedGenotyper -I $n.ready-mem.bam -o $n.ready-mem.vcf -nt $GATK_CORES
 
 # SNP calling and .vcf making
 # Threads used can be changed
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=unifiedgenotyper
 echo "***HaplotypeCaller, aka calling SNPs"
-$GENOME_ANALYSIS_TK -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -nct 8
+$GENOME_ANALYSIS_TK -R $ref -T HaplotypeCaller -I $n.ready-mem.bam -o $n.hapreadyAll.vcf -nct $GATK_CORES
 
 echo "******Awk VCF leaving just SNPs******"
 awk '/#/ || $4 ~ /^[ATGC]$/ && $5 ~ /^[ATGC]$/ {print $0}' $n.hapreadyAll.vcf > $n.hapreadyOnlySNPs.vcf

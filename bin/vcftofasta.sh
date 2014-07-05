@@ -255,7 +255,7 @@ echo "The number of chromosomes seen in VCF: $chromCount"
 
 function removeIsolates () {
 
-cat ${RemoveFromAnalysis} | awk '{print $1}' | tr '\r' '\n' > /Volumes/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysisUnixReady.txt
+cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /Volumes/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysisUnixReady.txt
 
 removeList=`cat /Volumes/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysisUnixReady.txt`
 

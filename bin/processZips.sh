@@ -192,6 +192,7 @@ java -Xmx2g -jar  /Users/Shared/_programs/picard-tools-1.100/SamToFastq.jar INPU
 rm $n.all.bam
 rm $n.unmappedReads.sam
 abyss-pe name=${n}_abyss k=64 in="${n}-unmapped_R1.fastq ${n}-unmapped_R1.fastq"
+
 mkdir ../unmappedReads
 mv ${n}-unmapped_R1.fastq ../unmappedReads
 mv ${n}-unmapped_R2.fastq ../unmappedReads
@@ -296,7 +297,7 @@ java -Xmx2g -jar /Users/Shared/_programs/picard-tools-1.100/CollectInsertSizeMet
 
 # Make coverage file
 bamtools coverage -in *.ready-mem.bam > ${n}-coverage
-cat ${n}-coverage > ${n}-coveragetemp
+cat ${n}-coverage > ${n}-coveragetemp-orginal
 chroms=`awk '{a[$1]++} END{for (var in a) print var}' ${n}-coverage | sort -n`
 num=1
 echo "chroms are: $chroms"
@@ -308,7 +309,7 @@ for i in $chroms; do
 done
 
 mv ${n}-coverage ${coverageFiles}/${n}-coverage
-mv ${n}-coveragetemp > ${n}-coverage
+
 ###
 
 cat $n.DepthofCoverage.xls >> $n.Metrics_summary.xls
@@ -414,7 +415,7 @@ cp $ref.fai ${bioinfo}/newFiles/$n/BWAmem-GATK
 cp *-coverage ${bioinfo}/newFiles/$n/BWAmem-GATK
 cp -r ../Zips/*.gz ${bioinfo}/newFiles/$n/Zips
 cp -r ./QualityValues/* ${bioinfo}/newFiles/$n/BWAmem-GATK/QualityValues
-cp -r ./unmappedReads/* ${bioinfo}/newFiles/$n/unmappedReads
+cp -r ../unmappedReads/* ${bioinfo}/newFiles/$n/unmappedReads
 cp -r ../../${n} $copyto
 pwd
 #Make dailyStats.txt for each stats.txt made for each isolate.

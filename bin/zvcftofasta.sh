@@ -255,7 +255,7 @@ echo "The number of chromosomes seen in VCF: $chromCount"
 
 function removeIsolates () {
 
-cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /Volumes/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysisUnixReady.txt
+cat ${RemoveFromAnalysis} | tr '\r' '\n' > /Volumes/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysisUnixReady.txt
 
 removeList=`cat /Volumes/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysisUnixReady.txt`
 
@@ -410,32 +410,32 @@ done
 #done
 
 # Make list of tb numbers of coverageFiles
-for f in $coverageFiles/*; do
-getbase=`basename "$f"`
-number=`echo $getbase | sed $tbNumberV | sed $tbNumberW | sed 's/-coverage//g'`
-echo $number >> coverageFiles
-done
-
-uniqlist=`cat vcfFiles coverageFiles | sort | uniq -u`
-
-rm vcfFiles
-rm coverageFiles
-
-uniqNumberSize=`echo $uniqlist | wc | awk '{print $3}'`
-if [ $uniqNumberSize -gt 4 ]
-then
-echo "No matching file was present"
-echo "Either there is no coverageFile for a vcf"
-echo "Or there is an extra coverageFile that is not needed"
-echo "Must have matching files, and restart script."
-echo "$uniqlist"
-
-else
-echo "coverageFiles are available for all vcfs"
-echo "Perfect match, Good Job Chap!"
-fi
-
-}
+#for f in $coverageFiles/*; do
+#getbase=`basename "$f"`
+#number=`echo $getbase | sed $tbNumberV | sed $tbNumberW | sed 's/-coverage//g'`
+#echo $number >> coverageFiles
+#done
+#
+#uniqlist=`cat vcfFiles coverageFiles | sort | uniq -u`
+#
+#rm vcfFiles
+#rm coverageFiles
+#
+#uniqNumberSize=`echo $uniqlist | wc | awk '{print $3}'`
+#if [ $uniqNumberSize -gt 4 ]
+#then
+#echo "No matching file was present"
+#echo "Either there is no coverageFile for a vcf"
+#echo "Or there is an extra coverageFile that is not needed"
+#echo "Must have matching files, and restart script."
+#echo "$uniqlist"
+#
+#else
+#echo "coverageFiles are available for all vcfs"
+#echo "Perfect match, Good Job Chap!"
+#fi
+#
+#}
 
 #################################################################################
 
@@ -564,11 +564,12 @@ cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.
     echo "numberWithV: $numberWithV"
     echo "number to grep list of coverage files: $number"
     # Get the zero coverage file matching the .filledcut file
-    zeroFile=`ls "$coverageFiles" | grep "$number"`
+         #zeroFile=`ls "$coverageFiles" | grep "$number"`
     echo "This is the coverage file that was found: $zeroFile"
     # Get the position of the zeroCoverage file
     # Get the position of the .filledcut file
             if [ $((chromCount)) -eq 1 ]; then
+         #awk ' $0 !~ /#/ && $8 !~ /^AN=2;/ && $10 ~ /\.\/\./ {print $0}'
                 awk -v z=$Ncov '$3 <  z {print $2, $3}' $coverageFiles/$zeroFile | awk '{print "chrom1-" $1}' > ${number}-zeroCoverage
                 elif [ $((chromCount)) -eq 2 ]; then
                 echo "*******************************************************************************"

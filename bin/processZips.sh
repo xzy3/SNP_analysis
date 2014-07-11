@@ -238,8 +238,12 @@ java -Xmx2g -jar /Users/Shared/_programs/GenomeAnalysisTK-3.1-1/GenomeAnalysisTK
 # SNP calling and .vcf making
 # Threads used can be changed
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=unifiedgenotyper
-echo "***UnifiedGenotyper, aka calling SNPs"
-java -Xmx2g -jar /Users/Shared/_programs/GenomeAnalysisTK-3.1-1/GenomeAnalysisTK.jar -R $ref -T UnifiedGenotyper -I $n.ready-mem.bam -o $n.ready-mem.vcf -nt 8
+#echo "***UnifiedGenotyper, aka calling SNPs"
+#java -Xmx2g -jar /Users/Shared/_programs/GenomeAnalysisTK-3.1-1/GenomeAnalysisTK.jar -R $ref -T UnifiedGenotyper -I $n.ready-mem.bam -o $n.ready-mem.vcf -nt 8
+
+# Add zero positions to vcf
+java -Xmx2g -jar /Users/Shared/_programs/GenomeAnalysisTK-3.1-1/GenomeAnalysisTK.jar -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I ${n}.ready-mem.bam -o ${n}.allsites.vcf -nt 8
+awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > $n.ready-mem.vcf
 
 # SNP calling and .vcf making
 # Threads used can be changed
@@ -296,19 +300,19 @@ echo "***Collect Insert Size Metrics"
 java -Xmx2g -jar /Users/Shared/_programs/picard-tools-1.100/CollectInsertSizeMetrics.jar REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam HISTOGRAM_FILE=$n.InsertSize.pdf OUTPUT=$n.CollectInsertSizeMetrics ASSUME_SORTED=true
 
 # Make coverage file
-bamtools coverage -in *.ready-mem.bam > ${n}-coverage
-cat ${n}-coverage > ${n}-coveragetemp-orginal
-chroms=`awk '{a[$1]++} END{for (var in a) print var}' ${n}-coverage | sort -n`
-num=1
-echo "chroms are: $chroms"
-for i in $chroms; do
-    sed "s/$i/chrom${num}/g" ${n}-coverage > temp.vcf
-    mv temp.vcf ${n}-coverage
-    echo "$i was marked as chrom${num}"
-    num=$(( $num + 1 ))
-done
+#bamtools coverage -in *.ready-mem.bam > ${n}-coverage
+#cat ${n}-coverage > ${n}-coveragetemp-orginal
+#chroms=`awk '{a[$1]++} END{for (var in a) print var}' ${n}-coverage | sort -n`
+#num=1
+#echo "chroms are: $chroms"
+#for i in $chroms; do
+#    sed "s/$i/chrom${num}/g" ${n}-coverage > temp.vcf
+#    mv temp.vcf ${n}-coverage
+#    echo "$i was marked as chrom${num}"
+#    num=$(( $num + 1 ))
+#done
 
-mv ${n}-coverage ${coverageFiles}/${n}-coverage
+#mv ${n}-coverage ${coverageFiles}/${n}-coverage
 
 ###
 

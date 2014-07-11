@@ -255,7 +255,7 @@ echo "The number of chromosomes seen in VCF: $chromCount"
 
 function removeIsolates () {
 
-cat ${RemoveFromAnalysis} | tr '\r' '\n' > /Volumes/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysisUnixReady.txt
+cat ${RemoveFromAnalysis} | tr '\r' '\n' | awk '{print $1}' > /Volumes/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysisUnixReady.txt
 
 removeList=`cat /Volumes/TStuber/Results/_Mycobacterium/_TB-VCF/RemoveFromAnalysisUnixReady.txt`
 
@@ -410,32 +410,32 @@ done
 #done
 
 # Make list of tb numbers of coverageFiles
-#for f in $coverageFiles/*; do
-#getbase=`basename "$f"`
-#number=`echo $getbase | sed $tbNumberV | sed $tbNumberW | sed 's/-coverage//g'`
-#echo $number >> coverageFiles
-#done
-#
-#uniqlist=`cat vcfFiles coverageFiles | sort | uniq -u`
-#
-#rm vcfFiles
-#rm coverageFiles
-#
-#uniqNumberSize=`echo $uniqlist | wc | awk '{print $3}'`
-#if [ $uniqNumberSize -gt 4 ]
-#then
-#echo "No matching file was present"
-#echo "Either there is no coverageFile for a vcf"
-#echo "Or there is an extra coverageFile that is not needed"
-#echo "Must have matching files, and restart script."
-#echo "$uniqlist"
-#
-#else
-#echo "coverageFiles are available for all vcfs"
-#echo "Perfect match, Good Job Chap!"
-#fi
-#
-#}
+for f in $coverageFiles/*; do
+getbase=`basename "$f"`
+number=`echo $getbase | sed $tbNumberV | sed $tbNumberW | sed 's/-coverage//g'`
+echo $number >> coverageFiles
+done
+
+uniqlist=`cat vcfFiles coverageFiles | sort | uniq -u`
+
+rm vcfFiles
+rm coverageFiles
+
+uniqNumberSize=`echo $uniqlist | wc | awk '{print $3}'`
+if [ $uniqNumberSize -gt 4 ]
+then
+echo "No matching file was present"
+echo "Either there is no coverageFile for a vcf"
+echo "Or there is an extra coverageFile that is not needed"
+echo "Must have matching files, and restart script."
+echo "$uniqlist"
+
+else
+echo "coverageFiles are available for all vcfs"
+echo "Perfect match, Good Job Chap!"
+fi
+
+}
 
 #################################################################################
 
@@ -544,70 +544,43 @@ for d in $directories; do
 
     echo "***Creating normalized vcf using AC2, QUAL > $QUAL"
         # Grab the name of the vcf file
-        for i in *.vcf; do
-        (m=`basename "$i"`; n=`echo $m | sed $dropEXT`
-            # echo the name grabbed
-            echo $n
-            # Create .cut file that lists the positions and ALT calls
-#egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{if ($1 ~ /chrom1/) print "chrom1-" $2, $5; else if ($1 ~ /chrom2/) print "chrom2-" $2, $5; else print "awk script can not determine VCF input"}' > $n.cut
-egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-" $2, $5}' > $n.cut
+for i in *.vcf; do
+    m=`basename "$i"`; n=`echo $m | sed $dropEXT`
+    # echo the name grabbed
+    echo $n
+    # Create .cut file that lists the positions and ALT calls
+    #egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{if ($1 ~ /chrom1/) print "chrom1-" $2, $5; else if ($1 ~ /chrom2/) print "chrom2-" $2, $5; else print "awk script can not determine VCF input"}' > $n.cut
+    egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-" $2, $5}' > $n.cut
 
-            # Fill in the .cut file with REF calls at positions that were not called as SNPs
-#cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
-cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
+    # Fill in the .cut file with REF calls at positions that were not called as SNPs
+    #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
+    cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
 
-    # Run coverage function on .filledcut to replace zero to low coverage positions with N.
-    echo "$n Replacing positions with coverage below $Ncov with an -"
-    
-    getbase=`basename "$n.filledcutnoN"`
-    numberWithV=`echo $getbase | sed $tbNumberV | sed $tbNumberW`; number=${numberWithV%V} #Changed from $tbNumberOnly
-    echo "numberWithV: $numberWithV"
-    echo "number to grep list of coverage files: $number"
-    # Get the zero coverage file matching the .filledcut file
-         #zeroFile=`ls "$coverageFiles" | grep "$number"`
-    echo "This is the coverage file that was found: $zeroFile"
-    # Get the position of the zeroCoverage file
-    # Get the position of the .filledcut file
-            if [ $((chromCount)) -eq 1 ]; then
-         #awk ' $0 !~ /#/ && $8 !~ /^AN=2;/ && $10 ~ /\.\/\./ {print $0}'
-                awk -v z=$Ncov '$3 <  z {print $2, $3}' $coverageFiles/$zeroFile | awk '{print "chrom1-" $1}' > ${number}-zeroCoverage
-                elif [ $((chromCount)) -eq 2 ]; then
-                echo "*******************************************************************************"
-                # Get the position of the zeroCoverage file at first chromosome
-                awk -v z=$Ncov '$1 ~ /chrom1/ && $3 <  z {print "chrom1-" $2}' $coverageFiles/${number}-coverage > ${number}-zeroCoverage
-                # Get the position of the zeroCoverage file at second chromosome
-                awk -v z=$Ncov '$1 ~ /chrom2/ && $3 <  z {print "chrom2-" $2}' $coverageFiles/${number}-coverage >> ${number}-zeroCoverage
-                echo "*******************************************************************************"
-                else
-                echo "Greater than 2 chromosomes present.  Exiting script."
-                exit 1
-            fi
-            awk '{print $1}' $n.filledcutnoN > ${number}-filledcutNumbers
-            # cat the two above together
-            cat ${number}-zeroCoverage ${number}-filledcutNumbers > ${number}-NcatFile
-            # Get duplicates of the cat file
-            # This duplicats need to replace A,T,G or C to an N, Would like to make it a "." or "-" but Geneious does not recognize these characters.
-            cat ${number}-NcatFile | sort | uniq -d > ${number}-duplicates
-            echo "chrom1-1000000000" >> ${number}-duplicates
-            # Prepare duplicate regions to be used as variables in awk, to find and replace
-            pos=`cat ${number}-duplicates | tr "\n" "|" | sed 's/|$//'`
-            echo "Zero Coverage: $pos"
-            #awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $0}' $n.filledcutnoN > $n.filledcut
-            awk -v x=$pos 'BEGIN {OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $1, $2}' $n.filledcutnoN | sort -k1.6n -k1.8n > $n.filledcut
+    # Get the zero coverage positions.
+    awk ' $0 !~ /#/ && $10 ~ /\.\/\./ {print $1 "-" $2}' ${i} > ${number}-zeroCoverage
 
-            rm ${number}-zeroCoverage
-            rm ${number}-filledcutNumbers
-            rm ${number}-NcatFile
-            rm ${number}-duplicates
-            rm $n.filledcutnoN
-            rm $i) &
-            let count+=1
-            [[ $((count%NR_CPUS)) -eq 0 ]] && wait
-            done
-            echo "sleeping 10 seconds at line number: $LINENO"; sleep 10
-            wait
+    awk '{print $1}' $n.filledcutnoN > ${number}-filledcutNumbers
+    # cat the two above together
+    cat ${number}-zeroCoverage ${number}-filledcutNumbers > ${number}-NcatFile
+    # Get duplicates of the cat file
+    # This duplicats need to replace A,T,G or C to an N, Would like to make it a "." or "-" but Geneious does not recognize these characters.
+    cat ${number}-NcatFile | sort | uniq -d > ${number}-duplicates
+    echo "chrom1-1000000000" >> ${number}-duplicates
+    # Prepare duplicate regions to be used as variables in awk, to find and replace
+    pos=`cat ${number}-duplicates | tr "\n" "|" | sed 's/|$//'`
+    echo "Zero Coverage: $pos"
+    #awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $0}' $n.filledcutnoN > $n.filledcut
+    awk -v x=$pos 'BEGIN {OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $1, $2}' $n.filledcutnoN | sort -k1.6n -k1.8n > $n.filledcut
 
-
+    rm ${number}-zeroCoverage
+    rm ${number}-filledcutNumbers
+    rm ${number}-NcatFile
+    rm ${number}-duplicates
+    rm $n.filledcutnoN
+    rm $i
+done
+echo "sleeping 10 seconds at line number: $LINENO"; sleep 10
+wait
 
         # Make a concatemer of the .filledcut files
         for i in *.filledcut; do
@@ -1000,32 +973,9 @@ egrep -v "#" $i | egrep "AC=2;A" | awk -v Q="$QUAL" '$6 > Q' | awk '{print $1 "-
 #cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -nk1 > $n.filledcutnoN
 cat $n.cut total_pos | awk '{ if (a[$1]++ == 0) print $0; }' |  sort -k1.6n -k1.8n > $n.filledcutnoN
 
-echo "$n Replacing positions with coverage below $Ncov with an -"
-getbase=`basename "$n.filledcutnoN"`
-numberWithV=`echo $getbase | sed $tbNumberV | sed $tbNumberW`; number=${numberWithV%V} #Changed from $tbNumberOnly
-echo "numberWithV: $numberWithV"
-echo "number: $number"
-echo "number to grep list of coverage files: $number"
-# Get the zero coverage file matching the .filledcut file
-zeroFile=`ls "$coverageFiles" | grep "$number"`
-echo "This is the coverage file that was found: $zeroFile"
-echo "This is the number: $number"
-echo "Zero coverage file found: $zeroFile"
+# Get the zero coverage positions.
+awk ' $0 !~ /#/ && $10 ~ /\.\/\./ {print $1 "-" $2}' ${i} > ${number}-zeroCoverage
 
-# Get the position of the zeroCoverage file
-if [ $((chromCount)) -eq 1 ]; then
-        awk -v z=$Ncov '$3 <  z {print $2, $3}' $coverageFiles/$zeroFile | awk '{print "chrom1-" $1}' > ${number}-zeroCoverage
-    elif [ $((chromCount)) -eq 2 ]; then
-        echo "*******************************************************************************"
-        # Get the position of the zeroCoverage file at first chromosome
-        awk -v z=$Ncov '$1 ~ /chrom1/ && $3 <  z {print "chrom1-" $2}' $coverageFiles/${number}-coverage > ${number}-zeroCoverage
-        # Get the position of the zeroCoverage file at second chromosome
-        awk -v z=$Ncov '$1 ~ /chrom2/ && $3 <  z {print "chrom2-" $2}' $coverageFiles/${number}-coverage >> ${number}-zeroCoverage
-        echo "*******************************************************************************"
-    else
-        echo "Greater than 2 chromosomes present.  Exiting script."
-    exit 1
-fi
 # Get the position of the .filledcut file
 awk '{print $1}' $n.filledcutnoN > ${number}-filledcutNumbers
 # cat the two above together
@@ -1040,7 +990,7 @@ pos=`cat ${number}-duplicates | tr "\n" "|" | sed 's/|$//'`
 echo "Zero Coverage: $pos"
 #awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $0}' $n.filledcutnoN | sort -nk1 > $n.filledcut
 awk -v x=$pos 'BEGIN {OFS="\t"} { if($1 ~ x ) print $1, "-"; else print $1, $2}' $n.filledcutnoN | sort -k1.6n -k1.8n > $n.filledcut
-read -p "$LINENO, ENTER"
+
 rm ${number}-zeroCoverage
 rm ${number}-filledcutNumbers
 rm ${number}-NcatFile
@@ -1335,9 +1285,9 @@ cp -r $PWD ${bioinfoVCF}
 echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 
-mail -s "$fileName $@ completed" tod.p.stuber@aphis.usda.gov < log.txt
-mail -s "$fileName $@ completed" suelee.robbe-austerman@aphis.usda.gov < log.txt
-mail -s "$fileName $@ completed" christine.r.quance@aphis.usda.gov < log.txt
+#mail -s "$fileName $@ completed" tod.p.stuber@aphis.usda.gov < log.txt
+#mail -s "$fileName $@ completed" suelee.robbe-austerman@aphis.usda.gov < log.txt
+#mail -s "$fileName $@ completed" christine.r.quance@aphis.usda.gov < log.txt
 
 
 echo "****************************** END ******************************"

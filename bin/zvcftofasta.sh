@@ -668,7 +668,7 @@ testDuplicates
 filterFilespreparation
 
 #Test for match coverage file
-checkMatchingCoverageFile
+#checkMatchingCoverageFile
 
 #copy the original vcfs to /starting_files
 mkdir starting_files
@@ -1285,9 +1285,9 @@ cp -r $PWD ${bioinfoVCF}
 echo "******* $LINENO, $PWD"
 fileName=`basename $0`
 
-#mail -s "$fileName $@ completed" tod.p.stuber@aphis.usda.gov < log.txt
-#mail -s "$fileName $@ completed" suelee.robbe-austerman@aphis.usda.gov < log.txt
-#mail -s "$fileName $@ completed" christine.r.quance@aphis.usda.gov < log.txt
+mail -s "$fileName $@ completed" tod.p.stuber@aphis.usda.gov < log.txt
+mail -s "$fileName $@ completed" suelee.robbe-austerman@aphis.usda.gov < log.txt
+mail -s "$fileName $@ completed" christine.r.quance@aphis.usda.gov < log.txt
 
 
 echo "****************************** END ******************************"

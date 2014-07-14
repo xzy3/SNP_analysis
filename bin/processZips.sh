@@ -270,6 +270,8 @@ rm $n.realignedBam.bai
 rm $forReads
 rm $revReads
 rm igv.log
+rm ${n}.allsites.vcf
+rm ${n}.allsites.vcf.idx
 
 ###################################
 # The next 6 steps collect metrics

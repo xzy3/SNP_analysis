@@ -476,7 +476,7 @@ for d in $directories; do
             for i in *.vcf; do
                 (m=`basename "$i"`; n=`echo $m | sed $dropEXT`
                 echo "***Adding filter to $n***"
-                grep -v "#" $i | awk '{print $2}' > $i.file
+                awk '$0 !~ /#/ && $10 ~ /\.\/\./ {print $2}' $i > $i.file
                 cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
                 cat $i.catFile | sort | uniq -d > $i.txt
                 pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/'`
@@ -496,7 +496,7 @@ for d in $directories; do
                 for i in *.vcf; do m=`basename "$i"`; n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
                 #Mark vcf allowing areas of the genome to be removed from the SNP analysis
                 echo "***Adding filter to $n***"
-                grep -v "#" $i | awk 'BEGIN {OFS="\t"} {print $1, $2}' > $i.file
+                awk ' $0 !~ /#/ && $10 ~ /\.\/\./ {print $1, $2}' $i > $i.file
                 cat "${FilterDirectory}/$d.txt" $i.file >> $i.catFile
                 cat $i.catFile | sort -k1,1 -k2,2 | uniq -d > $i.txt
                 pos1=`cat $i.txt | grep "chrom1" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/'`
@@ -737,9 +737,12 @@ done
 echo "Making Files Unix Compatiable"
 
 for v in *.vcf; do
-    dos2unix $v #Fixes files opened and saved in Excel
+    (dos2unix $v #Fixes files opened and saved in Excel
     cat $v | tr '\r' '\n' | awk -F '\t' 'BEGIN{OFS="\t";} {gsub("\"","",$5);print;}' | sed 's/\"##/##/' > temp
-    mv temp $v
+    mv temp $v) &
+    let count+=1
+    [[ $((count%NR_CPUS)) -eq 0 ]] && wait
+
 done
 
 ############## Capture the number of chromosomes and their name from a single VCF ##############
@@ -787,7 +790,7 @@ echo "***Marking all VCFs and removing filtering regions was done." >> log
     # Label filter field for positions to be filtered in all VCFs
         if [ $((chromCount)) -eq 1 ]; then
         for i in *.vcf; do
-            (m=`basename "$i"`; n=`echo $m | sed $dropEXT`; echo "********* $n **********"; grep -v "#" $i | awk '{print $2}' > $i.file; cat "${FilterDirectory}/FilterToAll.txt" $i.file >> $i.catFile; cat $i.catFile | sort | uniq -d > $i.txt; pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/'`; awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter.vcf; rm $i.file; rm $i.catFile; rm $i.txt; grep -v "Not_Included" $n.filter.vcf > $n.noPPE.vcf;  mv $n.noPPE.vcf $i) &
+            (m=`basename "$i"`; n=`echo $m | sed $dropEXT`; echo "********* $n **********"; awk '$0 !~ /#/ && $10 ~ /\.\/\./ {print $2}' $i > $i.file; cat "${FilterDirectory}/FilterToAll.txt" $i.file >> $i.catFile; cat $i.catFile | sort | uniq -d > $i.txt; pos=`cat $i.txt | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/'`; awk -v x=$pos 'BEGIN {FS="\t"; OFS="\t"} { if($2 ~ x ) print $1, $2, $3, $4, $5, $6, "Not_Included", $8, $9, $10; else print $0}' $i > $n.filter.vcf; rm $i.file; rm $i.catFile; rm $i.txt; grep -v "Not_Included" $n.filter.vcf > $n.noPPE.vcf;  mv $n.noPPE.vcf $i) &
             let count+=1
             [[ $((count%NR_CPUS)) -eq 0 ]] && wait
         done
@@ -798,7 +801,7 @@ echo "***Marking all VCFs and removing filtering regions was done." >> log
             n=`echo $m | sed $dropEXT` # n is name with all right of "_" and "." removed.
             #Mark vcf allowing areas of the genome to be removed from the SNP analysis
             echo "********* $n **********"
-            grep -v "#" $i | awk 'BEGIN {OFS="\t"} {print $1, $2}' > $i.file
+            awk '$0 !~ /#/ && $10 ~ /\.\/\./ {print $1, $2}' $i > $i.file
             cat "${FilterDirectory}/FilterToAll.txt" $i.file >> $i.catFile
             cat $i.catFile | sort -k1,1 -k2,2 | uniq -d > $i.txt
             pos1=`cat $i.txt | grep "chrom1" | awk '{print $2}' | tr "\n" "W" | sed 's/W/\$\|\^/g' | sed 's/\$\|\^$//' | sed 's/$/\$/' | sed 's/^/\^/'`

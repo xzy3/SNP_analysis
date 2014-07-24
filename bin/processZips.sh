@@ -270,7 +270,8 @@ $GENOME_ANALYSIS_TK -T PrintReads -R $ref -I $n.realignedBam.bam -BQSR $n.recal_
 # Threads used can be changed
 # http://www.broadinstitute.org/gatk/guide/tagged?tag=unifiedgenotyper
 echo "***UnifiedGenotyper, aka calling SNPs"
-$GENOME_ANALYSIS_TK -R $ref -T UnifiedGenotyper -I $n.ready-mem.bam -o $n.ready-mem.vcf -nt $GATK_CORES
+$GENOME_ANALYSIS_TK -R $ref -T UnifiedGenotyper -out_mode EMIT_ALL_SITES -I $n.ready-mem.bam -o $n.ready-mem.vcf -nt $GATK_CORES
+awk ' $0 ~ /#/ || $8 !~ /^AN=2;/ {print $0}' ${n}.allsites.vcf > $n.ready-mem.vcf
 
 # SNP calling and .vcf making
 # Threads used can be changed
@@ -297,6 +298,8 @@ rm $n.realignedBam.bai
 rm $forReads
 rm $revReads
 rm igv.log
+rm ${n}.allsites.vcf
+rm ${n}.allsites.vcf.idx
 
 ###################################
 # The next 6 steps collect metrics
@@ -327,20 +330,20 @@ echo "***Collect Insert Size Metrics"
 $PICARD_CollectInsertSizeMetrics REFERENCE_SEQUENCE=$ref INPUT=$n.ready-mem.bam HISTOGRAM_FILE=$n.InsertSize.pdf OUTPUT=$n.CollectInsertSizeMetrics ASSUME_SORTED=true
 
 # Make coverage file
-$BAMTOOLS coverage -in *.ready-mem.bam > ${n}-coverage
-cat ${n}-coverage > ${n}-coveragetemp
-chroms=`awk '{a[$1]++} END{for (var in a) print var}' ${n}-coverage | sort -n`
-num=1
-echo "chroms are: $chroms"
-for i in $chroms; do
-    sed "s/$i/chrom${num}/g" ${n}-coverage > temp.vcf
-    mv temp.vcf ${n}-coverage
-    echo "$i was marked as chrom${num}"
-    num=$(( $num + 1 ))
-done
-
-mv ${n}-coverage ${coverageFiles}/${n}-coverage
-mv ${n}-coveragetemp > ${n}-coverage
+#$BAMTOOLS coverage -in *.ready-mem.bam > ${n}-coverage
+#cat ${n}-coverage > ${n}-coveragetemp
+#chroms=`awk '{a[$1]++} END{for (var in a) print var}' ${n}-coverage | sort -n`
+#num=1
+#echo "chroms are: $chroms"
+#for i in $chroms; do
+#    sed "s/$i/chrom${num}/g" ${n}-coverage > temp.vcf
+#    mv temp.vcf ${n}-coverage
+#    echo "$i was marked as chrom${num}"
+#    num=$(( $num + 1 ))
+#done
+#
+#mv ${n}-coverage ${coverageFiles}/${n}-coverage
+#mv ${n}-coveragetemp > ${n}-coverage
 ###
 
 cat $n.DepthofCoverage.xls >> $n.Metrics_summary.xls
